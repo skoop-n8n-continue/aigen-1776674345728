@@ -431,3 +431,62 @@ body {
         font-size: 2.5rem;
     }
 }
+
+/* 1280x720 Optimization */
+@media (width: 1280px) and (height: 720px) {
+    .container {
+        max-width: 600px;
+    }
+
+    .container.expanded {
+        max-width: 1100px;
+    }
+
+    .container.expanded .glass-card {
+        padding: 40px 60px;
+    }
+
+    .container.expanded .clock-display {
+        font-size: 9rem;
+    }
+
+    .container.expanded .ampm-display {
+        font-size: 4rem;
+    }
+
+    .container.expanded .date-display {
+        font-size: 2.2rem;
+    }
+
+    .container.expanded .temp-display {
+        font-size: 7rem;
+    }
+
+    .container.expanded .weather-icon {
+        font-size: 7rem;
+    }
+
+    .container.expanded .condition-display {
+        font-size: 2.2rem;
+    }
+
+    .container.expanded .location-display {
+        font-size: 1.6rem;
+    }
+
+    .container.expanded .forecast-grid {
+        gap: 30px;
+    }
+
+    .container.expanded .forecast-day {
+        font-size: 1.4rem;
+    }
+
+    .container.expanded .forecast-temp {
+        font-size: 1.8rem;
+    }
+
+    .container.expanded .forecast-icon {
+        font-size: 3rem;
+    }
+}

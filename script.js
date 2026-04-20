@@ -29,7 +29,7 @@
 
     // App State
     var is24Hour = true;
-    var isExpanded = false;
+    var isExpanded = true;
     var isForecastVisible = true;
 
     try {
