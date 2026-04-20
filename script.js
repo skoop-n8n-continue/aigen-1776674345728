@@ -4,6 +4,7 @@
  */
 
 const clockElement = document.getElementById('clock');
+const ampmElement = document.getElementById('ampm');
 const dateElement = document.getElementById('date');
 const weatherContainer = document.getElementById('weather-content');
 const weatherLoading = document.getElementById('weather-loading');
@@ -14,24 +15,71 @@ const conditionElement = document.getElementById('condition');
 const locationElement = document.getElementById('location');
 const iconElement = document.getElementById('weather-icon');
 
+// UI Controls
+const toggleFormatBtn = document.getElementById('toggle-format');
+const toggleSizeBtn = document.getElementById('toggle-size');
+const container = document.querySelector('.container');
+
+// App State
+let is24Hour = localStorage.getItem('is24Hour') !== 'false'; // Default to true
+let isExpanded = localStorage.getItem('isExpanded') === 'true'; // Default to false
+
 /**
  * Clock Logic
  */
 function updateClock() {
     const now = new Date();
 
-    // Time format: HH:MM:SS
-    const hours = String(now.getHours()).padStart(2, '0');
+    let hours = now.getHours();
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-    clockElement.textContent = `${hours}:${minutes}:${seconds}`;
+
+    if (!is24Hour) {
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        ampmElement.textContent = ampm;
+        ampmElement.classList.remove('hidden');
+    } else {
+        ampmElement.classList.add('hidden');
+    }
+
+    const hoursStr = String(hours).padStart(2, '0');
+    clockElement.textContent = `${hoursStr}:${minutes}:${seconds}`;
 
     // Date format: Day, Month Day, Year
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     dateElement.textContent = now.toLocaleDateString(undefined, options);
 }
 
+/**
+ * UI Controls Logic
+ */
+function initControls() {
+    // Set initial state from localStorage
+    updateFormatUI();
+    if (isExpanded) container.classList.add('expanded');
+
+    toggleFormatBtn.addEventListener('click', () => {
+        is24Hour = !is24Hour;
+        localStorage.setItem('is24Hour', is24Hour);
+        updateFormatUI();
+        updateClock();
+    });
+
+    toggleSizeBtn.addEventListener('click', () => {
+        isExpanded = !isExpanded;
+        localStorage.setItem('isExpanded', isExpanded);
+        container.classList.toggle('expanded');
+    });
+}
+
+function updateFormatUI() {
+    toggleFormatBtn.textContent = is24Hour ? '24H' : '12H';
+}
+
 // Initial call and set interval
+initControls();
 updateClock();
 setInterval(updateClock, 1000);
 

@@ -40,6 +40,11 @@ body {
     width: 90%;
     max-width: 500px;
     z-index: 1;
+    transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.container.expanded {
+    max-width: 900px;
 }
 
 .glass-card {
@@ -51,7 +56,47 @@ body {
     padding: 40px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     text-align: center;
-    transition: transform 0.3s ease;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.container.expanded .glass-card {
+    padding: 60px;
+}
+
+.controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.control-btn {
+    background: var(--glass-bg);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid var(--glass-border);
+    color: var(--text-light);
+    padding: 8px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary-color);
+}
+
+.control-btn:active {
+    transform: scale(0.95);
 }
 
 .fade-in {
@@ -69,6 +114,24 @@ body {
     letter-spacing: -2px;
     margin-bottom: 8px;
     color: var(--primary-color);
+    transition: font-size 0.5s ease;
+}
+
+.container.expanded .clock-display {
+    font-size: 8rem;
+}
+
+.ampm-display {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: -10px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.container.expanded .ampm-display {
+    font-size: 2.5rem;
 }
 
 .date-display {
@@ -77,6 +140,11 @@ body {
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 2px;
+    transition: font-size 0.5s ease;
+}
+
+.container.expanded .date-display {
+    font-size: 1.8rem;
 }
 
 .divider {
@@ -85,6 +153,12 @@ body {
     border: none;
     height: 2px;
     background-color: var(--glass-border);
+    transition: width 0.5s ease;
+}
+
+.container.expanded .divider {
+    width: 200px;
+    margin: 40px auto;
 }
 
 .weather-section {
@@ -105,11 +179,21 @@ body {
 
 .weather-icon {
     font-size: 3rem;
+    transition: font-size 0.5s ease;
+}
+
+.container.expanded .weather-icon {
+    font-size: 5rem;
 }
 
 .temp-display {
     font-size: 3rem;
     font-weight: 400;
+    transition: font-size 0.5s ease;
+}
+
+.container.expanded .temp-display {
+    font-size: 5rem;
 }
 
 .condition-display {
@@ -117,12 +201,22 @@ body {
     font-weight: 400;
     color: var(--text-light);
     margin-bottom: 4px;
+    transition: font-size 0.5s ease;
+}
+
+.container.expanded .condition-display {
+    font-size: 1.8rem;
 }
 
 .location-display {
     font-size: 0.9rem;
     font-weight: 300;
     color: var(--text-muted);
+    transition: font-size 0.5s ease;
+}
+
+.container.expanded .location-display {
+    font-size: 1.4rem;
 }
 
 .loading, .error {

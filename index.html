@@ -11,14 +11,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=a1b2c3">
+    <link rel="stylesheet" href="style.css?v=e5f6g7">
 </head>
 <body>
     <div class="background-overlay"></div>
+    <div class="controls fade-in">
+        <button id="toggle-format" class="control-btn" title="Toggle 12h/24h">24H</button>
+        <button id="toggle-size" class="control-btn" title="Toggle Size">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </button>
+    </div>
     <main class="container">
-        <section class="glass-card fade-in">
+        <section id="main-card" class="glass-card fade-in">
             <div class="clock-section">
                 <div id="clock" class="clock-display">00:00:00</div>
+                <div id="ampm" class="ampm-display hidden">AM</div>
                 <div id="date" class="date-display">Monday, 1 January 2026</div>
             </div>
 
@@ -43,15 +50,6 @@
             </div>
         </section>
     </main>
-    <script src="script.js?v=a1b2c3"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('./sw.js')
-          .then(function (reg) { console.log('[PWA] SW registered:', reg.scope); })
-          .catch(function (err) { console.warn('[PWA] SW registration failed:', err); });
-      });
-    }
-  </script>
+    <script src="script.js?v=e5f6g7"></script>
 </body>
 </html>
