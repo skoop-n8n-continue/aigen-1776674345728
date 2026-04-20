@@ -1,183 +1,295 @@
 /**
  * Modern Clock & Weather App
  * Built for Skoop Digital Signage
+ *
+ * Optimized for older browsers and devices.
  */
 
-const clockElement = document.getElementById('clock');
-const ampmElement = document.getElementById('ampm');
-const dateElement = document.getElementById('date');
-const weatherContainer = document.getElementById('weather-content');
-const weatherLoading = document.getElementById('weather-loading');
-const weatherError = document.getElementById('weather-error');
+(function() {
+    // DOM Elements
+    var clockElement = document.getElementById('clock');
+    var ampmElement = document.getElementById('ampm');
+    var dateElement = document.getElementById('date');
+    var weatherContainer = document.getElementById('weather-content');
+    var weatherLoading = document.getElementById('weather-loading');
+    var weatherError = document.getElementById('weather-error');
 
-const tempElement = document.getElementById('temp');
-const conditionElement = document.getElementById('condition');
-const locationElement = document.getElementById('location');
-const iconElement = document.getElementById('weather-icon');
+    var tempElement = document.getElementById('temp');
+    var conditionElement = document.getElementById('condition');
+    var locationElement = document.getElementById('location');
+    var iconElement = document.getElementById('weather-icon');
 
-// UI Controls
-const toggleFormatBtn = document.getElementById('toggle-format');
-const toggleSizeBtn = document.getElementById('toggle-size');
-const container = document.querySelector('.container');
+    // UI Controls
+    var toggleFormatBtn = document.getElementById('toggle-format');
+    var toggleSizeBtn = document.getElementById('toggle-size');
+    var container = document.querySelector('.container');
 
-// App State
-let is24Hour = localStorage.getItem('is24Hour') !== 'false'; // Default to true
-let isExpanded = localStorage.getItem('isExpanded') === 'true'; // Default to false
+    // App State
+    var is24Hour = true;
+    var isExpanded = false;
 
-/**
- * Clock Logic
- */
-function updateClock() {
-    const now = new Date();
-
-    let hours = now.getHours();
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    if (!is24Hour) {
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
-        ampmElement.textContent = ampm;
-        ampmElement.classList.remove('hidden');
-    } else {
-        ampmElement.classList.add('hidden');
+    try {
+        if (window.localStorage) {
+            is24Hour = localStorage.getItem('is24Hour') !== 'false';
+            isExpanded = localStorage.getItem('isExpanded') === 'true';
+        }
+    } catch (e) {
+        console.warn('LocalStorage not available');
     }
 
-    const hoursStr = String(hours).padStart(2, '0');
-    clockElement.textContent = `${hoursStr}:${minutes}:${seconds}`;
+    /**
+     * Text content helper for IE8 support
+     */
+    function setText(el, text) {
+        if (!el) return;
+        if (typeof el.textContent !== 'undefined') {
+            el.textContent = text;
+        } else {
+            el.innerText = text;
+        }
+    }
 
-    // Date format: Day, Month Day, Year
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    dateElement.textContent = now.toLocaleDateString(undefined, options);
-}
+    /**
+     * Class manipulation helpers for IE9 support
+     */
+    function addClass(el, cls) {
+        if (!el) return;
+        if (el.classList) {
+            el.classList.add(cls);
+        } else {
+            var curr = el.className;
+            if (curr.indexOf(cls) === -1) {
+                el.className = curr ? curr + ' ' + cls : cls;
+            }
+        }
+    }
 
-/**
- * UI Controls Logic
- */
-function initControls() {
-    // Set initial state from localStorage
-    updateFormatUI();
-    if (isExpanded) container.classList.add('expanded');
+    function removeClass(el, cls) {
+        if (!el) return;
+        if (el.classList) {
+            el.classList.remove(cls);
+        } else {
+            el.className = el.className.replace(new RegExp('(^|\\b)' + cls.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+        }
+    }
 
-    toggleFormatBtn.addEventListener('click', () => {
-        is24Hour = !is24Hour;
-        localStorage.setItem('is24Hour', is24Hour);
+    /**
+     * Polyfill for padStart (ES2017)
+     */
+    function padLeft(str, len, char) {
+        str = String(str);
+        char = char || '0';
+        while (str.length < len) {
+            str = char + str;
+        }
+        return str;
+    }
+
+    /**
+     * Clock Logic
+     */
+    function updateClock() {
+        var now = new Date();
+
+        var hours = now.getHours();
+        var minutes = padLeft(now.getMinutes(), 2);
+        var seconds = padLeft(now.getSeconds(), 2);
+
+        if (!is24Hour) {
+            var ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            setText(ampmElement, ampm);
+            removeClass(ampmElement, 'hidden');
+        } else {
+            addClass(ampmElement, 'hidden');
+        }
+
+        var hoursStr = padLeft(hours, 2);
+        setText(clockElement, hoursStr + ':' + minutes + ':' + seconds);
+
+        // Date format: Day, Month Day, Year
+        try {
+            var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            setText(dateElement, now.toLocaleDateString(undefined, options));
+        } catch (e) {
+            // Fallback for very old browsers
+            setText(dateElement, now.toDateString());
+        }
+    }
+
+    /**
+     * UI Controls Logic
+     */
+    function initControls() {
+        // Set initial state from localStorage
         updateFormatUI();
-        updateClock();
-    });
+        if (isExpanded) {
+            addClass(container, 'expanded');
+        }
 
-    toggleSizeBtn.addEventListener('click', () => {
-        isExpanded = !isExpanded;
-        localStorage.setItem('isExpanded', isExpanded);
-        container.classList.toggle('expanded');
-    });
-}
+        toggleFormatBtn.addEventListener('click', function() {
+            is24Hour = !is24Hour;
+            try {
+                if (window.localStorage) localStorage.setItem('is24Hour', is24Hour);
+            } catch (e) {}
+            updateFormatUI();
+            updateClock();
+        });
 
-function updateFormatUI() {
-    toggleFormatBtn.textContent = is24Hour ? '24H' : '12H';
-}
+        toggleSizeBtn.addEventListener('click', function() {
+            isExpanded = !isExpanded;
+            try {
+                if (window.localStorage) localStorage.setItem('isExpanded', isExpanded);
+            } catch (e) {}
+            if (isExpanded) {
+                addClass(container, 'expanded');
+            } else {
+                removeClass(container, 'expanded');
+            }
+        });
+    }
 
-// Initial call and set interval
-initControls();
-updateClock();
-setInterval(updateClock, 1000);
+    function updateFormatUI() {
+        setText(toggleFormatBtn, is24Hour ? '24H' : '12H');
+    }
 
-/**
- * Weather Logic (Open-Meteo + IP Geolocation)
- */
-async function initWeather() {
-    try {
+    /**
+     * XMLHttpRequest Wrapper for Weather API
+     */
+    function getJson(url, callback) {
+        var xhr;
+        if (window.XMLHttpRequest) {
+            xhr = new XMLHttpRequest();
+        } else if (window.ActiveXObject) {
+            try {
+                xhr = new ActiveXObject("Msxml2.XMLHTTP");
+            } catch (e) {
+                try {
+                    xhr = new ActiveXObject("Microsoft.XMLHTTP");
+                } catch (e) {
+                    return callback(new Error('XHR not supported'));
+                }
+            }
+        }
+
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+                        callback(null, data);
+                    } catch (e) {
+                        callback(new Error('Invalid JSON response'));
+                    }
+                } else {
+                    callback(new Error('HTTP Error: ' + xhr.status));
+                }
+            }
+        };
+        xhr.onerror = function() {
+            callback(new Error('Network error'));
+        };
+        xhr.send();
+    }
+
+    /**
+     * Weather Logic (Open-Meteo)
+     */
+    function initWeather() {
         // Set location to Lahore, Pakistan as requested
-        const latitude = 31.5204;
-        const longitude = 74.3587;
-        const city = "Lahore";
-        const country_name = "Pakistan";
+        var latitude = 31.5204;
+        var longitude = 74.3587;
+        var city = "Lahore";
+        var country_name = "Pakistan";
 
-        locationElement.textContent = `${city}, ${country_name}`;
+        setText(locationElement, city + ", " + country_name);
 
         // Fetch weather data for the specified coordinates
-        await fetchWeather(latitude, longitude);
-
-    } catch (error) {
-        console.error('Weather init error:', error);
-        showError();
+        fetchWeather(latitude, longitude);
     }
-}
 
-async function fetchWeather(lat, lon) {
-    try {
-        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`;
-        const response = await fetch(weatherUrl, { cache: 'no-store' });
+    function fetchWeather(lat, lon) {
+        var weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true&timezone=auto';
 
-        if (!response.ok) throw new Error('Weather API error');
+        getJson(weatherUrl, function(err, data) {
+            if (err) {
+                console.error('Fetch weather error:', err);
+                showError();
+                return;
+            }
 
-        const data = await response.json();
-        const current = data.current_weather;
-
-        updateWeatherUI(current.temperature, current.weathercode);
-
-    } catch (error) {
-        console.error('Fetch weather error:', error);
-        showError();
+            if (data && data.current_weather) {
+                var current = data.current_weather;
+                updateWeatherUI(current.temperature, current.weathercode);
+            } else {
+                showError();
+            }
+        });
     }
-}
 
-function updateWeatherUI(temp, code) {
-    tempElement.textContent = `${Math.round(temp)}°C`;
+    function updateWeatherUI(temp, code) {
+        setText(tempElement, Math.round(temp) + '°C');
 
-    const weatherInfo = mapWeatherCode(code);
-    conditionElement.textContent = weatherInfo.label;
-    iconElement.textContent = weatherInfo.icon;
+        var weatherInfo = mapWeatherCode(code);
+        setText(conditionElement, weatherInfo.label);
+        setText(iconElement, weatherInfo.icon);
 
-    weatherLoading.classList.add('hidden');
-    weatherError.classList.add('hidden');
-    weatherContainer.classList.remove('hidden');
-}
+        addClass(weatherLoading, 'hidden');
+        addClass(weatherError, 'hidden');
+        removeClass(weatherContainer, 'hidden');
+    }
 
-function showError() {
-    weatherLoading.classList.add('hidden');
-    weatherContainer.classList.add('hidden');
-    weatherError.classList.remove('hidden');
-}
+    function showError() {
+        addClass(weatherLoading, 'hidden');
+        addClass(weatherContainer, 'hidden');
+        removeClass(weatherError, 'hidden');
+    }
 
-/**
- * WMO Weather interpretation codes (WW)
- * https://open-meteo.com/en/docs
- */
-function mapWeatherCode(code) {
-    const mapping = {
-        0: { label: 'Clear Sky', icon: '☀️' },
-        1: { label: 'Mainly Clear', icon: '🌤️' },
-        2: { label: 'Partly Cloudy', icon: '⛅' },
-        3: { label: 'Overcast', icon: '☁️' },
-        45: { label: 'Foggy', icon: '🌫️' },
-        48: { label: 'Depositing Rime Fog', icon: '🌫️' },
-        51: { label: 'Light Drizzle', icon: '🌦️' },
-        53: { label: 'Moderate Drizzle', icon: '🌦️' },
-        55: { label: 'Dense Drizzle', icon: '🌦️' },
-        61: { label: 'Slight Rain', icon: '🌧️' },
-        63: { label: 'Moderate Rain', icon: '🌧️' },
-        65: { label: 'Heavy Rain', icon: '🌧️' },
-        71: { label: 'Slight Snow', icon: '❄️' },
-        73: { label: 'Moderate Snow', icon: '❄️' },
-        75: { label: 'Heavy Snow', icon: '❄️' },
-        77: { label: 'Snow Grains', icon: '❄️' },
-        80: { label: 'Slight Rain Showers', icon: '🌦️' },
-        81: { label: 'Moderate Rain Showers', icon: '🌦️' },
-        82: { label: 'Violent Rain Showers', icon: '🌧️' },
-        85: { label: 'Slight Snow Showers', icon: '🌨️' },
-        86: { label: 'Heavy Snow Showers', icon: '🌨️' },
-        95: { label: 'Thunderstorm', icon: '⛈️' },
-        96: { label: 'Thunderstorm with Hail', icon: '⛈️' },
-        99: { label: 'Thunderstorm with Heavy Hail', icon: '⛈️' }
-    };
+    /**
+     * WMO Weather interpretation codes (WW)
+     */
+    function mapWeatherCode(code) {
+        var mapping = {
+            0: { label: 'Clear Sky', icon: '☀️' },
+            1: { label: 'Mainly Clear', icon: '🌤️' },
+            2: { label: 'Partly Cloudy', icon: '⛅' },
+            3: { label: 'Overcast', icon: '☁️' },
+            45: { label: 'Foggy', icon: '🌫️' },
+            48: { label: 'Depositing Rime Fog', icon: '🌫️' },
+            51: { label: 'Light Drizzle', icon: '🌦️' },
+            53: { label: 'Moderate Drizzle', icon: '🌦️' },
+            55: { label: 'Dense Drizzle', icon: '🌦️' },
+            61: { label: 'Slight Rain', icon: '🌧️' },
+            63: { label: 'Moderate Rain', icon: '🌧️' },
+            65: { label: 'Heavy Rain', icon: '🌧️' },
+            71: { label: 'Slight Snow', icon: '❄️' },
+            73: { label: 'Moderate Snow', icon: '❄️' },
+            75: { label: 'Heavy Snow', icon: '❄️' },
+            77: { label: 'Snow Grains', icon: '❄️' },
+            80: { label: 'Slight Rain Showers', icon: '🌦️' },
+            81: { label: 'Moderate Rain Showers', icon: '🌦️' },
+            82: { label: 'Violent Rain Showers', icon: '🌧️' },
+            85: { label: 'Slight Snow Showers', icon: '🌨️' },
+            86: { label: 'Heavy Snow Showers', icon: '🌨️' },
+            95: { label: 'Thunderstorm', icon: '⛈️' },
+            96: { label: 'Thunderstorm with Hail', icon: '⛈️' },
+            99: { label: 'Thunderstorm with Heavy Hail', icon: '⛈️' }
+        };
 
-    return mapping[code] || { label: 'Unknown', icon: '❓' };
-}
+        return mapping[code] || { label: 'Unknown', icon: '❓' };
+    }
 
-// Start weather detection
-initWeather();
+    // Expose initWeather to window for the retry button
+    window.initWeather = initWeather;
 
-// Refresh weather every 30 minutes
-setInterval(initWeather, 30 * 60 * 1000);
+    // Start everything
+    initControls();
+    updateClock();
+    setInterval(updateClock, 1000);
+    initWeather();
+
+    // Refresh weather every 30 minutes
+    setInterval(initWeather, 30 * 60 * 1000);
+})();
