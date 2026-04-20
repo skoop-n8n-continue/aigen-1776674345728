@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Modern Clock & Weather</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=a1b2c3">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <main class="container">
+        <section class="glass-card fade-in">
+            <div class="clock-section">
+                <div id="clock" class="clock-display">00:00:00</div>
+                <div id="date" class="date-display">Monday, 1 January 2026</div>
+            </div>
+
+            <hr class="divider">
+
+            <div id="weather-container" class="weather-section">
+                <div id="weather-loading" class="loading">Detecting location...</div>
+                <div id="weather-content" class="hidden">
+                    <div class="weather-main">
+                        <div id="weather-icon" class="weather-icon"></div>
+                        <div id="temp" class="temp-display">--°C</div>
+                    </div>
+                    <div class="weather-details">
+                        <div id="condition" class="condition-display">Clear Sky</div>
+                        <div id="location" class="location-display">City, Country</div>
+                    </div>
+                </div>
+                <div id="weather-error" class="error hidden">Unable to load weather data</div>
+            </div>
+        </section>
+    </main>
+    <script src="script.js?v=a1b2c3"></script>
+</body>
+</html>
