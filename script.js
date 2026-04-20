@@ -40,15 +40,15 @@ setInterval(updateClock, 1000);
  */
 async function initWeather() {
     try {
-        // Step 1: Detect location via IP (Reliable for signage)
-        const geoResponse = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
-        if (!geoResponse.ok) throw new Error('Location detection failed');
-        const geoData = await geoResponse.json();
+        // Set location to Lahore, Pakistan as requested
+        const latitude = 31.5204;
+        const longitude = 74.3587;
+        const city = "Lahore";
+        const country_name = "Pakistan";
 
-        const { latitude, longitude, city, country_name } = geoData;
         locationElement.textContent = `${city}, ${country_name}`;
 
-        // Step 2: Fetch weather data
+        // Fetch weather data for the specified coordinates
         await fetchWeather(latitude, longitude);
 
     } catch (error) {
