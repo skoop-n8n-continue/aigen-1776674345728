@@ -36,7 +36,10 @@
                         <div id="location" class="location-display">City, Country</div>
                     </div>
                 </div>
-                <div id="weather-error" class="error hidden">Unable to load weather data</div>
+                <div id="weather-error" class="error hidden">
+                    <p>Unable to load weather data</p>
+                    <button onclick="initWeather()" class="retry-btn">Retry</button>
+                </div>
             </div>
         </section>
     </main>

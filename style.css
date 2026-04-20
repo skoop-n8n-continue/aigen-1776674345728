@@ -134,6 +134,29 @@ body {
     color: #ff5f5f;
 }
 
+.retry-btn {
+    margin-top: 15px;
+    padding: 8px 20px;
+    background-color: var(--primary-color);
+    color: #000;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.retry-btn:hover {
+    background-color: #008a84;
+    transform: scale(1.05);
+}
+
+.retry-btn:active {
+    transform: scale(0.95);
+}
+
 .hidden {
     display: none;
 }
