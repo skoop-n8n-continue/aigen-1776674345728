@@ -132,6 +132,12 @@ body {
     border-color: var(--primary-color);
 }
 
+.control-btn.active {
+    background: rgba(0, 183, 175, 0.2);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
 .control-btn:active {
     -webkit-transform: scale(0.95);
     -ms-transform: scale(0.95);
@@ -289,6 +295,81 @@ body {
 }
 
 .container.expanded .location-display {
+    font-size: 1.4rem;
+}
+
+/* Forecast Section */
+.forecast-section {
+    margin-top: 20px;
+    -webkit-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+.forecast-divider {
+    margin: 20px auto;
+    width: 100%;
+}
+
+.forecast-grid {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[4];
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.forecast-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 10px 5px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.forecast-day {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.forecast-icon {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.forecast-temp {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.forecast-temp-min {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.container.expanded .forecast-grid {
+    gap: 20px;
+}
+
+.container.expanded .forecast-day {
+    font-size: 1.1rem;
+}
+
+.container.expanded .forecast-icon {
+    font-size: 2.5rem;
+}
+
+.container.expanded .forecast-temp {
     font-size: 1.4rem;
 }
 

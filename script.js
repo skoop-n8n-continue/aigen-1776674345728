@@ -13,6 +13,8 @@
     var weatherContainer = document.getElementById('weather-content');
     var weatherLoading = document.getElementById('weather-loading');
     var weatherError = document.getElementById('weather-error');
+    var forecastSection = document.getElementById('forecast-section');
+    var forecastGrid = document.getElementById('forecast-grid');
 
     var tempElement = document.getElementById('temp');
     var conditionElement = document.getElementById('condition');
@@ -21,17 +23,20 @@
 
     // UI Controls
     var toggleFormatBtn = document.getElementById('toggle-format');
+    var toggleForecastBtn = document.getElementById('toggle-forecast');
     var toggleSizeBtn = document.getElementById('toggle-size');
     var container = document.querySelector('.container');
 
     // App State
     var is24Hour = true;
     var isExpanded = false;
+    var isForecastVisible = true;
 
     try {
         if (window.localStorage) {
             is24Hour = localStorage.getItem('is24Hour') !== 'false';
             isExpanded = localStorage.getItem('isExpanded') === 'true';
+            isForecastVisible = localStorage.getItem('isForecastVisible') !== 'false';
         }
     } catch (e) {
         console.warn('LocalStorage not available');
@@ -127,6 +132,7 @@
         if (isExpanded) {
             addClass(container, 'expanded');
         }
+        updateForecastVisibility();
 
         toggleFormatBtn.addEventListener('click', function() {
             is24Hour = !is24Hour;
@@ -135,6 +141,14 @@
             } catch (e) {}
             updateFormatUI();
             updateClock();
+        });
+
+        toggleForecastBtn.addEventListener('click', function() {
+            isForecastVisible = !isForecastVisible;
+            try {
+                if (window.localStorage) localStorage.setItem('isForecastVisible', isForecastVisible);
+            } catch (e) {}
+            updateForecastVisibility();
         });
 
         toggleSizeBtn.addEventListener('click', function() {
@@ -152,6 +166,16 @@
 
     function updateFormatUI() {
         setText(toggleFormatBtn, is24Hour ? '24H' : '12H');
+    }
+
+    function updateForecastVisibility() {
+        if (isForecastVisible) {
+            removeClass(forecastSection, 'hidden');
+            addClass(toggleForecastBtn, 'active');
+        } else {
+            addClass(forecastSection, 'hidden');
+            removeClass(toggleForecastBtn, 'active');
+        }
     }
 
     /**
@@ -211,7 +235,7 @@
     }
 
     function fetchWeather(lat, lon) {
-        var weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true&timezone=auto';
+        var weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto';
 
         getJson(weatherUrl, function(err, data) {
             if (err) {
@@ -223,6 +247,10 @@
             if (data && data.current_weather) {
                 var current = data.current_weather;
                 updateWeatherUI(current.temperature, current.weathercode);
+
+                if (data.daily) {
+                    updateForecastUI(data.daily);
+                }
             } else {
                 showError();
             }
@@ -239,6 +267,34 @@
         addClass(weatherLoading, 'hidden');
         addClass(weatherError, 'hidden');
         removeClass(weatherContainer, 'hidden');
+    }
+
+    function updateForecastUI(daily) {
+        if (!daily || !daily.time) return;
+
+        var html = '';
+        var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        // Show 4 days starting from tomorrow (index 1 to 4)
+        for (var i = 1; i <= 4; i++) {
+            if (!daily.time[i]) break;
+
+            var date = new Date(daily.time[i]);
+            var dayName = dayNames[date.getDay()];
+            var maxTemp = Math.round(daily.temperature_2m_max[i]);
+            var minTemp = Math.round(daily.temperature_2m_min[i]);
+            var code = daily.weathercode[i];
+            var weatherInfo = mapWeatherCode(code);
+
+            html += '<div class="forecast-item">';
+            html += '  <div class="forecast-day">' + dayName + '</div>';
+            html += '  <div class="forecast-icon">' + weatherInfo.icon + '</div>';
+            html += '  <div class="forecast-temp">' + maxTemp + '°</div>';
+            html += '  <div class="forecast-temp-min">' + minTemp + '°</div>';
+            html += '</div>';
+        }
+
+        forecastGrid.innerHTML = html;
     }
 
     function showError() {
