@@ -36,7 +36,13 @@ body {
     overflow: hidden;
     background: #10181f;
     background: radial-gradient(circle at center, #1a2a3a 0%, #10181f 100%);
+    transition: background 2s ease;
 }
+
+body.theme-morning { background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%); }
+body.theme-afternoon { background: radial-gradient(circle at center, #1a2a3a 0%, #10181f 100%); }
+body.theme-evening { background: radial-gradient(circle at center, #243b55 0%, #141e30 100%); }
+body.theme-night { background: radial-gradient(circle at center, #0f2027 0%, #203a43 0%, #2c5364 100%); }
 
 .background-overlay {
     position: fixed;
@@ -371,6 +377,79 @@ body {
 
 .container.expanded .forecast-temp {
     font-size: 1.4rem;
+}
+
+/* Prayer Section */
+.prayer-section {
+    margin-top: 20px;
+    -webkit-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+.prayer-divider {
+    margin: 20px auto;
+    width: 100%;
+}
+
+.prayer-grid {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[5];
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.prayer-item {
+    background: rgba(0, 183, 175, 0.05);
+    border: 1px solid rgba(0, 183, 175, 0.1);
+    border-radius: 12px;
+    padding: 10px 5px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.prayer-item.active {
+    background: rgba(0, 183, 175, 0.2);
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+.prayer-name {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.prayer-item.active .prayer-name {
+    color: var(--primary-color);
+}
+
+.prayer-time {
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+.container.expanded .prayer-grid {
+    gap: 15px;
+}
+
+.container.expanded .prayer-name {
+    font-size: 1.1rem;
+}
+
+.container.expanded .prayer-time {
+    font-size: 1.6rem;
 }
 
 .loading, .error {

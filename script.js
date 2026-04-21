@@ -15,6 +15,8 @@
     var weatherError = document.getElementById('weather-error');
     var forecastSection = document.getElementById('forecast-section');
     var forecastGrid = document.getElementById('forecast-grid');
+    var prayerSection = document.getElementById('prayer-section');
+    var prayerGrid = document.getElementById('prayer-grid');
 
     var tempElement = document.getElementById('temp');
     var conditionElement = document.getElementById('condition');
@@ -24,6 +26,7 @@
     // UI Controls
     var toggleFormatBtn = document.getElementById('toggle-format');
     var toggleForecastBtn = document.getElementById('toggle-forecast');
+    var togglePrayerBtn = document.getElementById('toggle-prayer');
     var toggleSizeBtn = document.getElementById('toggle-size');
     var container = document.querySelector('.container');
 
@@ -31,12 +34,14 @@
     var is24Hour = true;
     var isExpanded = true;
     var isForecastVisible = true;
+    var isPrayerVisible = true;
 
     try {
         if (window.localStorage) {
             is24Hour = localStorage.getItem('is24Hour') !== 'false';
             isExpanded = localStorage.getItem('isExpanded') === 'true';
             isForecastVisible = localStorage.getItem('isForecastVisible') !== 'false';
+            isPrayerVisible = localStorage.getItem('isPrayerVisible') !== 'false';
         }
     } catch (e) {
         console.warn('LocalStorage not available');
@@ -100,6 +105,8 @@
         var minutes = padLeft(now.getMinutes(), 2);
         var seconds = padLeft(now.getSeconds(), 2);
 
+        updateTheme(hours);
+
         if (!is24Hour) {
             var ampm = hours >= 12 ? 'PM' : 'AM';
             hours = hours % 12;
@@ -123,6 +130,24 @@
         }
     }
 
+    function updateTheme(hours) {
+        var body = document.body;
+        removeClass(body, 'theme-morning');
+        removeClass(body, 'theme-afternoon');
+        removeClass(body, 'theme-evening');
+        removeClass(body, 'theme-night');
+
+        if (hours >= 5 && hours < 12) {
+            addClass(body, 'theme-morning');
+        } else if (hours >= 12 && hours < 17) {
+            addClass(body, 'theme-afternoon');
+        } else if (hours >= 17 && hours < 21) {
+            addClass(body, 'theme-evening');
+        } else {
+            addClass(body, 'theme-night');
+        }
+    }
+
     /**
      * UI Controls Logic
      */
@@ -133,6 +158,7 @@
             addClass(container, 'expanded');
         }
         updateForecastVisibility();
+        updatePrayerVisibility();
 
         toggleFormatBtn.addEventListener('click', function() {
             is24Hour = !is24Hour;
@@ -141,6 +167,8 @@
             } catch (e) {}
             updateFormatUI();
             updateClock();
+            // Re-render prayer times to match format
+            initPrayerTimes();
         });
 
         toggleForecastBtn.addEventListener('click', function() {
@@ -149,6 +177,14 @@
                 if (window.localStorage) localStorage.setItem('isForecastVisible', isForecastVisible);
             } catch (e) {}
             updateForecastVisibility();
+        });
+
+        togglePrayerBtn.addEventListener('click', function() {
+            isPrayerVisible = !isPrayerVisible;
+            try {
+                if (window.localStorage) localStorage.setItem('isPrayerVisible', isPrayerVisible);
+            } catch (e) {}
+            updatePrayerVisibility();
         });
 
         toggleSizeBtn.addEventListener('click', function() {
@@ -175,6 +211,16 @@
         } else {
             addClass(forecastSection, 'hidden');
             removeClass(toggleForecastBtn, 'active');
+        }
+    }
+
+    function updatePrayerVisibility() {
+        if (isPrayerVisible) {
+            removeClass(prayerSection, 'hidden');
+            addClass(togglePrayerBtn, 'active');
+        } else {
+            addClass(prayerSection, 'hidden');
+            removeClass(togglePrayerBtn, 'active');
         }
     }
 
@@ -216,6 +262,75 @@
             callback(new Error('Network error'));
         };
         xhr.send();
+    }
+
+    /**
+     * Prayer Times Logic (Aladhan)
+     */
+    function initPrayerTimes() {
+        var city = "Lahore";
+        var country = "Pakistan";
+        var method = 1; // University of Islamic Sciences, Karachi
+        var url = 'https://api.aladhan.com/v1/timingsByCity?city=' + city + '&country=' + country + '&method=' + method;
+
+        getJson(url, function(err, data) {
+            if (err) {
+                console.error('Fetch prayer times error:', err);
+                return;
+            }
+
+            if (data && data.data && data.data.timings) {
+                updatePrayerUI(data.data.timings);
+            }
+        });
+    }
+
+    function updatePrayerUI(timings) {
+        var prayers = [
+            { id: 'Fajr', name: 'Fajr' },
+            { id: 'Dhuhr', name: 'Dhuhr' },
+            { id: 'Asr', name: 'Asr' },
+            { id: 'Maghrib', name: 'Maghrib' },
+            { id: 'Isha', name: 'Isha' }
+        ];
+
+        var html = '';
+        var now = new Date();
+        var currentTime = now.getHours() * 60 + now.getMinutes();
+        var nextPrayerIndex = -1;
+
+        for (var i = 0; i < prayers.length; i++) {
+            var prayer = prayers[i];
+            var timeStr = timings[prayer.id];
+            var timeParts = timeStr.split(':');
+            var pMinutes = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
+
+            // Format time based on preference
+            var displayTime = timeStr;
+            if (!is24Hour) {
+                var h = parseInt(timeParts[0]);
+                var m = timeParts[1];
+                var ampm = h >= 12 ? 'PM' : 'AM';
+                h = h % 12;
+                h = h ? h : 12;
+                displayTime = h + ':' + m + ' ' + ampm;
+            }
+
+            // Determine if this is the next prayer
+            var activeClass = '';
+            if (nextPrayerIndex === -1 && pMinutes > currentTime) {
+                nextPrayerIndex = i;
+                activeClass = ' active';
+            }
+
+            html += '<div class="prayer-item' + activeClass + '">';
+            html += '  <div class="prayer-name">' + prayer.name + '</div>';
+            html += '  <div class="prayer-time">' + displayTime + '</div>';
+            html += '</div>';
+        }
+
+        // If no prayer is next today, Fajr tomorrow is next (but we just mark none active for now or could mark Fajr)
+        prayerGrid.innerHTML = html;
     }
 
     /**
@@ -345,7 +460,10 @@
     updateClock();
     setInterval(updateClock, 1000);
     initWeather();
+    initPrayerTimes();
 
     // Refresh weather every 30 minutes
     setInterval(initWeather, 30 * 60 * 1000);
+    // Refresh prayer times every 6 hours
+    setInterval(initPrayerTimes, 6 * 60 * 60 * 1000);
 })();
